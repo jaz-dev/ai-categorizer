@@ -12,23 +12,41 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface Category {
+  id: number;
   name: string;
   color: string;
   code: string;
 }
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const CategoryList: React.FC = (): ReactElement => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState<string>('');
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState<string>('');
   const [hasNewAddition, setHasNewAddition] = useState<boolean>(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(API_URL);
+      if (!response.ok) throw new Error('Failed to fetch categories');
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
   const generateRandomColor = useCallback((): string => {
     const hue = Math.floor(Math.random() * 360);
-    const saturation = Math.floor(Math.random() * 30) + 70; // 70-100%
-    const lightness = Math.floor(Math.random() * 30) + 35; // 35-65%
+    const saturation = Math.floor(Math.random() * 30) + 70;
+    const lightness = Math.floor(Math.random() * 30) + 35;
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }, []);
 
@@ -53,16 +71,30 @@ const CategoryList: React.FC = (): ReactElement => {
     return `${letter}${number.toString().padStart(2, '0')}`;
   }, [categories]);
 
-  const addCategory = (): void => {
+  const addCategory = async (): Promise<void> => {
     if (newCategory.trim() !== '') {
-      const newCode = generateNextCode();
-      setCategories([...categories, {
+      const newCategoryData = {
         name: newCategory.trim(),
         color: generateRandomColor(),
-        code: newCode
-      }]);
-      setNewCategory('');
-      setHasNewAddition(true);
+        code: generateNextCode()
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newCategoryData)
+        });
+
+        if (!response.ok) throw new Error('Failed to add category');
+
+        const addedCategory = await response.json();
+        setCategories([...categories, addedCategory]);
+        setNewCategory('');
+        setHasNewAddition(true);
+      } catch (error) {
+        console.error('Error adding category:', error);
+      }
     }
   };
 
@@ -79,27 +111,45 @@ const CategoryList: React.FC = (): ReactElement => {
     }
   };
 
-  const removeCategory = (index: number): void => {
-    setCategories(categories.filter((_, i) => i !== index));
+  const removeCategory = async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete category');
+      setCategories(categories.filter(category => category.id !== id));
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
   };
 
-  const startEditing = (index: number): void => {
-    setEditingIndex(index);
-    setEditText(categories[index].name);
+  const startEditing = (id: number): void => {
+    setEditingId(id);
+    const category = categories.find(c => c.id === id);
+    if (category) setEditText(category.name);
   };
 
-  const saveEdit = (): void => {
-    if (editingIndex !== null && editText.trim() !== '') {
-      const updatedCategories = [...categories];
-      updatedCategories[editingIndex].name = editText.trim();
-      setCategories(updatedCategories);
-      setEditingIndex(null);
-      setEditText('');
+  const saveEdit = async (): Promise<void> => {
+    if (editingId && editText.trim() !== '') {
+      try {
+        const response = await fetch(`${API_URL}/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: editText.trim() })
+        });
+
+        if (!response.ok) throw new Error('Failed to update category');
+
+        const updatedCategory = await response.json();
+        setCategories(categories.map(c => c.id === editingId ? updatedCategory : c));
+        setEditingId(null);
+        setEditText('');
+      } catch (error) {
+        console.error('Error updating category:', error);
+      }
     }
   };
 
   const cancelEdit = (): void => {
-    setEditingIndex(null);
+    setEditingId(null);
     setEditText('');
   };
 
@@ -107,8 +157,8 @@ const CategoryList: React.FC = (): ReactElement => {
     <Card className="w-[300px] p-4">
       <CardContent>
         <ScrollArea className="max-h-[200px] mb-4 rounded border overflow-y-auto" ref={scrollAreaRef}>
-          {categories.map((item, index) => (
-            <div key={index} className="p-2 border-b last:border-b-0 flex justify-between items-center">
+          {categories.map((item) => (
+            <div key={item.id} className="p-2 border-b last:border-b-0 flex justify-between items-center">
               <div className="flex items-center flex-1">
                 <div
                   className="w-8 h-8 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white"
@@ -116,7 +166,7 @@ const CategoryList: React.FC = (): ReactElement => {
                 >
                   {item.code}
                 </div>
-                {editingIndex === index ? (
+                {editingId === item.id ? (
                   <Input
                     value={editText}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditText(e.target.value)}
@@ -139,11 +189,11 @@ const CategoryList: React.FC = (): ReactElement => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => startEditing(index)}>
+                  <DropdownMenuItem onClick={() => startEditing(item.id)}>
                     <Edit className="mr-2 h-4 w-4" />
                     <span>Edit</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => removeCategory(index)}>
+                  <DropdownMenuItem onClick={() => removeCategory(item.id)}>
                     <Trash className="mr-2 h-4 w-4" />
                     <span>Remove</span>
                   </DropdownMenuItem>
@@ -153,7 +203,7 @@ const CategoryList: React.FC = (): ReactElement => {
           ))}
         </ScrollArea>
         <div className="mt-4">
-          {editingIndex === null ? (
+          {editingId === null ? (
             <>
               <Input
                 type="text"
