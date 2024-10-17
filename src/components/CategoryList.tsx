@@ -166,21 +166,7 @@ const CategoryList: React.FC = (): ReactElement => {
                 >
                   {item.code}
                 </div>
-                {editingId === item.id ? (
-                  <Input
-                    value={editText}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditText(e.target.value)}
-                    onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                      if (e.key === 'Enter') {
-                        saveEdit();
-                      }
-                    }}
-                    autoFocus
-                    className="flex-1"
-                  />
-                ) : (
-                  <span className="flex-1">{item.name}</span>
-                )}
+                <span className="flex-1">{item.name}</span>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

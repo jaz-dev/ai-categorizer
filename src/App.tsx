@@ -1,12 +1,16 @@
 import './App.css'
+import InputList from './components/CategorizedInputs'
 import CategoryList from './components/CategoryList'
 import UserInput from './components/user-inputs/UserInput'
 
 function App() {
   return (
     <>
-      <CategoryList/>
-      <UserInput/>
+      <div className="flex">
+        <CategoryList/>
+        <UserInput/>
+      </div>
+      <InputList/>
     </>
   )
 }
