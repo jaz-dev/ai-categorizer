@@ -154,7 +154,7 @@ const CategoryList: React.FC = (): ReactElement => {
   };
 
   return (
-    <Card className="w-[300px] p-4">
+    <Card className="w-[300px] p-4 text-center">
       <CardContent>
         <ScrollArea className="max-h-[200px] mb-4 rounded border overflow-y-auto" ref={scrollAreaRef}>
           {categories.map((item) => (

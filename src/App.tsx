@@ -1,5 +1,5 @@
 import './App.css'
-import InputList from './components/CategorizedInputs'
+import InputList from './components/InputList'
 import CategoryList from './components/CategoryList'
 import UserInput from './components/user-inputs/UserInput'
 
