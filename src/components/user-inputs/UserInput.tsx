@@ -3,10 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import TabButton from "./TabButton";
+import { UserInputType } from '@/types';
 
 const API_URL = import.meta.env.VITE_USER_INPUTS_API_URL;
 
-const UserInput = () => {
+interface UserInputProps {
+  addUserInput: (newInput: UserInputType) => void;
+}
+const UserInput: React.FC<UserInputProps> = ({ addUserInput }) => {
   const [inputType, setInputType] = useState<'text' | 'csv'>('text');
   const [textInput, setTextInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +38,8 @@ const UserInput = () => {
         throw new Error('Network response was not ok');
       }
 
-      const data = await response.json();
+      const data: UserInputType = await response.json();
+      addUserInput(data);
       console.log('Submitted successfully:', data);
       setTextInput(''); // Clear the input after successful submission
     } catch (err) {

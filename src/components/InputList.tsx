@@ -2,29 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MoreVertical, Edit, Trash } from 'lucide-react';
+import { MoreVertical, Trash } from 'lucide-react';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-interface Category {
-    id: number;
-    name: string;
-    color: string;
-    code: string;
-}
-  
-interface UserInput {
-    id: number;
-    input_data: string;
-    Categories: Category[];
-}
+import { UserInputType } from '@/types'
 
 interface InputBoxProps {
-  input: UserInput;
+  input: UserInputType;
   removeInput: (id: number) => Promise<void>;
 }
 const API_URL = import.meta.env.VITE_USER_INPUTS_API_URL;
@@ -91,8 +79,12 @@ const InputBox: React.FC<InputBoxProps> = ({ input, removeInput }) => {
   );
 };
 
-const InputList: React.FC = () => {
-  const [userInputs, setUserInputs] = useState<UserInput[]>([]);
+interface InputListProps {
+  userInputs: UserInputType[];
+  setUserInputs: React.Dispatch<React.SetStateAction<UserInputType[]>>;
+}
+
+const InputList: React.FC<InputListProps> = ({userInputs, setUserInputs}) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -113,7 +105,7 @@ const InputList: React.FC = () => {
   const fetchUserInputs = async () => {
     try {
       const response = await fetch(API_URL);
-      const data: UserInput[] = await response.json();
+      const data: UserInputType[] = await response.json();
       setUserInputs(data);
       setLoading(false);
     } catch (error) {
