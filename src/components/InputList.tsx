@@ -117,7 +117,7 @@ const InputList: React.FC<InputListProps> = ({userInputs, setUserInputs}) => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   return (
-    <ScrollArea className="h-[500px] w-[800px] border rounded-lg p-6">
+    <ScrollArea className="h-[500px] w-[800px] border rounded-lg p-6 bg-white">
       {userInputs.map((input) => (
         <InputBox key={input.id} input={input} removeInput={removeInput} />
       ))}

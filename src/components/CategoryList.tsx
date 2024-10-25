@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MoreVertical, Edit, Trash } from 'lucide-react';
+import { MoreVertical, Trash } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -121,12 +121,6 @@ const CategoryList: React.FC = (): ReactElement => {
     }
   };
 
-  const startEditing = (id: number): void => {
-    setEditingId(id);
-    const category = categories.find(c => c.id === id);
-    if (category) setEditText(category.name);
-  };
-
   const saveEdit = async (): Promise<void> => {
     if (editingId && editText.trim() !== '') {
       try {
@@ -154,7 +148,7 @@ const CategoryList: React.FC = (): ReactElement => {
   };
 
   return (
-    <Card className="w-[300px] p-4 text-center">
+    <Card className="w-[500px] p-4 text-center">
       <CardContent>
         <ScrollArea className="max-h-[200px] mb-4 rounded border overflow-y-auto" ref={scrollAreaRef}>
           {categories.map((item) => (
@@ -175,10 +169,6 @@ const CategoryList: React.FC = (): ReactElement => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => startEditing(item.id)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    <span>Edit</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => removeCategory(item.id)}>
                     <Trash className="mr-2 h-4 w-4" />
                     <span>Remove</span>

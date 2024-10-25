@@ -66,7 +66,7 @@ const UserInput: React.FC<UserInputProps> = ({ addUserInput }) => {
           CSV
         </TabButton>
       </div>
-      <div className="border border-gray-300 p-4 rounded-b-lg min-w-[800px]">
+      <div className="border border-gray-300 p-4 rounded-b-lg min-w-[800px] bg-white">
         {inputType === 'text' ? (
           <div className="space-y-4">
             <Textarea
